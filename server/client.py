@@ -5,7 +5,8 @@ Created on Tue Apr 21 10:30:50 2020
 
 @author: juliengautier
 """
-
+# more details : https://github.com/ekbanasolutions/numpy-using-socket
+        
 #########################################################################
 # 
 #     TCP Client Script
@@ -20,19 +21,20 @@ from pyqtgraph.Qt import QtCore
 import time
 import pickle
 import struct
-
+import numpy as np
 
 class CLIENT():
     
     def __init__(self):
         
         super(CLIENT, self).__init__()
-        self.serverHost = _socket.gethostname()
+        self.serverHost = "192.168.1.50"#_socket.gethostname()
         self.serverPort = 5009
         self.clientSocket= _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM)      # create socket
         try :
             self.clientSocket.connect((self.serverHost,self.serverPort))
             self.isConnected = True
+            print('client connected')
         except:
             self.isConnected = False
                 
@@ -54,18 +56,43 @@ class CLIENT():
     
     
     
+    def recvall(self,sock, count):
+        buf = b''
+        while count:
+            print(count)
+            newbuf = sock.recv(count)
+            if not newbuf: return None
+            buf += newbuf
+            count -= len(newbuf)
+        return buf
+    
+    
+    
+    def receive_array2(self):
+        length = self.recvall(self.clientSocket,16)
+        length=length.decode()
+        
+        stringData = self.recvall(self.clientSocket, int(length))
+        stringData=stringData.decode()
+        data = np.fromstring(stringData, dtype='uint8')
+        return data
+        
     def receive_array(self):
-        self.payload_size = struct.calcsize("L")  ### CHANGED
+        print('recv')
+        self.payload_size = struct.calcsize("=L")  ### CHANGED L for linux =L for PC
         self.data = b''
         while len(self.data) < self.payload_size:
+            
             self.data += self.clientSocket.recv(4096)
             
         packed_msg_size = self.data[:self.payload_size]
         
         self.data = self.data[self.payload_size:]
-        msg_size = struct.unpack("L", packed_msg_size)[0]
-
+        
+        msg_size = struct.unpack("=L", packed_msg_size)[0]
+        #print(self.data).decode()
         # Retrieve all data based on message size
+        
         while len(self.data) < msg_size:
             self.data +=self.clientSocket.recv(4096)
 

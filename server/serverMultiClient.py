@@ -110,7 +110,7 @@ class SERVER(QtCore.QThread):
         data = pickle.dumps(np_array)
 
         # Send message length first
-        message_size = struct.pack("L", len(data))  ### CHANGED
+        message_size = struct.pack("=L", len(data))  ### L for linux, =L for PC "CHANGED"
 
         # Then data
         client.sendall(message_size + data)
