@@ -4,7 +4,7 @@ Created on Sat Apr  9 18:01:56 2022
 
 @author: GAUTIER
 """
-import fdb
+import fdb     ### must be used with 32 bits python installation 
 import time
 from pyqtgraph.Qt import QtCore
 
